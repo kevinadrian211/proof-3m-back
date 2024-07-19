@@ -1,0 +1,22 @@
+server:
+  port: 8081
+  error:
+    include-message: always
+#Configuracion de spring
+spring:
+  #Configuracion de migracion
+  flyway:
+    enabled: true
+    baselineVersion: 1
+    locations:
+      classpath: db/migration
+    sqlMigrationSuffixes: .sql
+    baselineOnMigrate: true
+    sqlMigrationPrefix: V
+    schemas: public
+
+  datasource:
+    url: jdbc:postgresql://kala.db.elephantsql.com:5432/hkusflac?socketTimeout=3
+    username: hkusflac
+    password: PtuYPyxp53PUIECcjaJd-Kdjk-10aK4d
+    driverClassName: org.postgresql.Driver
