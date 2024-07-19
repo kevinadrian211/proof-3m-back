@@ -11,6 +11,8 @@ class Characters {
     var id: Long? = null
     var namec: String? = null
     var scenes_count: Int? = null
-    @ManyToOne (fetch = FetchType.LAZY)
-    val scenes  : Scenes? =null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scenes_id")
+    val scene: Scenes? = null
 }
