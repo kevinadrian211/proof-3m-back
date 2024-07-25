@@ -9,24 +9,22 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class FilmsService {
+
     @Autowired
     private lateinit var filmsRepository: FilmsRepository
 
-    @Autowired
-    lateinit var FilmsRepository: FilmsRepository
-
     fun list(): List<Films> {
-        return FilmsRepository.findAll()
+        return filmsRepository.findAll()
     }
 
     fun save(films: Films): Films {
-        return FilmsRepository.save(films)
+        return filmsRepository.save(films)
     }
 
     fun update(films: Films): Films {
         try {
             filmsRepository.findById(films.id)
-                ?: throw Exception("Films not found")
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Films not found")
             return filmsRepository.save(films)
         } catch (ex: Exception) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
@@ -35,12 +33,10 @@ class FilmsService {
 
     fun updateName(films: Films): Films {
         try {
-            val response = filmsRepository.findById(films.id)
-            ?: throw Exception("Films not found")
-            response.apply {
-                titlef =films.titlef
-            }
-            return filmsRepository.save(films)
+            val existingFilm = filmsRepository.findById(films.id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Films not found")
+            existingFilm.titlef = films.titlef
+            return filmsRepository.save(existingFilm)
         } catch (ex: Exception) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
         }
@@ -48,11 +44,10 @@ class FilmsService {
 
     fun delete(id: Long) {
         try {
-            val filmsOptional = FilmsRepository.findById(id)
+            val filmsOptional = filmsRepository.findById(id)
             if (filmsOptional.isPresent) {
-                val films = filmsOptional.get()
-                filmsRepository
-            }else{
+                filmsRepository.deleteById(id)
+            } else {
                 throw ResponseStatusException(HttpStatus.NOT_FOUND, "No films found with provided ID")
             }
         } catch (ex: Exception) {

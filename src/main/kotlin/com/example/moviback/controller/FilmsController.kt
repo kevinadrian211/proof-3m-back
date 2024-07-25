@@ -5,38 +5,48 @@ import com.example.moviback.service.FilmsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/films")
-@CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE])
-class FilmsController {
-    @Autowired
-    lateinit var filmsService: FilmsService
+@CrossOrigin(
+    origins = ["http://localhost:8081"],
+    methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE],
+    allowedHeaders = ["*"],
+    allowCredentials = "true"
+)
+class FilmsController @Autowired constructor(
+    private val filmsService: FilmsService
+) {
 
     @GetMapping
-    fun list(): List<Films> {
-        return filmsService.list()
+    fun list(): ResponseEntity<List<Films>> {
+        return ResponseEntity.ok(filmsService.list())
     }
 
     @PostMapping
-    fun save(@RequestBody films: Films): Films {
-        return filmsService.save(films)
+    fun save(@RequestBody @Validated films: Films): ResponseEntity<Films> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(filmsService.save(films))
     }
 
     @PutMapping
-    fun update(@RequestBody films: Films): ResponseEntity<Films> {
-        return ResponseEntity(filmsService.update(films), HttpStatus.OK)
+    fun update(@RequestBody @Validated films: Films): ResponseEntity<Films> {
+        return ResponseEntity.ok(filmsService.update(films))
     }
 
     @PatchMapping
-    fun updateName(@RequestBody films: Films): ResponseEntity<Films> {
-        return ResponseEntity(filmsService.updateName(films), HttpStatus.OK)
+    fun updateName(@RequestBody @Validated films: Films): ResponseEntity<Films> {
+        return ResponseEntity.ok(filmsService.updateName(films))
     }
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long): ResponseEntity<String> {
-        filmsService.delete(id)
-        return ResponseEntity.ok("films deleted successfully")
+        return try {
+            filmsService.delete(id)
+            ResponseEntity.ok("Film deleted successfully")
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film not found")
+        }
     }
 }
